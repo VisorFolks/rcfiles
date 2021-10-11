@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+
+from os import system
+from subprocess import check_output as cop
+from subprocess import CalledProcessError as CPE
+
+def str_clean(val):
+    val = val.decode()
+    return val.replace('\n', '')
+
+def check_installation():
+    bins = ""
+    print("< ! > Checking installation ...")
+    tmux = str_clean(cop("which tmux", shell=True))
+    bash = str_clean(cop("which bash", shell=True))
+    vim = str_clean(cop("which vim", shell=True))
+
+    if tmux == "":
+    	bins += " tmux"
+    if bash == "":
+    	bins += " bash"
+    if vim == "":
+    	bins += " vim"
+    if not bins == "":
+    	print("< ! >"+ bins + " is/are not installed... We will install it for you.")
+    	system("sudo apt install" + bins + " -y")
+    else:
+    	print("< / > All necessary tools are installed!")
+    return
+
+def create_backup():
+    cmd = ""
+    try:
+        backup = str_clean(cop("ls backup 2> /dev/null", shell=True))
+        if not backup == "":
+           print("< ! > Backup config files are found... You may want to check them!\n< x > Exiting the setup ...")
+           exit()
+    except CPE:
+    	print("< ! > No backup found!")
+    print("< / > Creating backup of existing config files ...")
+    tmux_conf = str_clean(cop("ls ~/.tmux.conf", shell=True))
+    bashrc = str_clean(cop("ls ~/.bashrc", shell=True))
+    vimrc = str_clean(cop("ls ~/.vimrc", shell=True))
+    if not tmux_conf == "":
+    	cmd += "cp " + tmux_conf + " backup/tmux.conf;"
+    if not bashrc == "":
+    	cmd += "cp " + bashrc + " backup/bashrc;"
+    if not vimrc == "":
+    	cmd += "cp " + vimrc + " backup/vimrc;"
+
+    if not cmd == "":
+    	system("mkdir -p backup/;" + cmd)
+    return
+
+def copy_config():
+    print("< ! > Adding new config ...")
+    cmd = "cp config/tmux.conf ~/.tmux.conf;"
+    cmd += "cp config/bashrc ~/.bashrc;"
+    cmd += "cp config/vimrc ~/.vimrc;"
+    system(cmd)
+    return
+
+def setup_utils():
+    print("< ! > Setting up few more things ...")
+    cmd = "sudo gcc -Wall -Werror src/cpu_util.c -o /bin/cpu_u;"
+    cmd += "sudo cp src/T /bin/"
+    system(cmd)
+    return
+
+if __name__ == "__main__":
+    check_installation()
+    create_backup()
+    copy_config()
+    setup_utils()
+    print("< / > Done!")
+    exit()
