@@ -30,6 +30,9 @@ def check_installation():
 
 def create_backup():
     cmd = ""
+    tmux_conf = ""
+    bashrc = ""
+    vimrc = ""
     try:
         backup = str_clean(cop("ls backup 2> /dev/null", shell=True))
         if not backup == "":
@@ -38,9 +41,19 @@ def create_backup():
     except CPE:
     	print("< ! > No backup found!")
     print("< / > Creating backup of existing config files ...")
-    tmux_conf = str_clean(cop("ls ~/.tmux.conf", shell=True))
-    bashrc = str_clean(cop("ls ~/.bashrc", shell=True))
-    vimrc = str_clean(cop("ls ~/.vimrc", shell=True))
+    try:
+        tmux_conf = str_clean(cop("ls ~/.tmux.conf 2> /dev/null", shell=True))
+    except CPE:
+    	pass
+    try:
+        bashrc = str_clean(cop("ls ~/.bashrc 2> /dev/null", shell=True))
+    except CPE:
+    	pass
+    try:
+        vimrc = str_clean(cop("ls ~/.vimrc 2> /dev/null", shell=True))
+    except CPE:
+    	pass
+
     if not tmux_conf == "":
     	cmd += "cp " + tmux_conf + " backup/tmux.conf;"
     if not bashrc == "":
